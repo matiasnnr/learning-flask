@@ -1,6 +1,10 @@
-from flask import Flask, request, make_response, redirect, render_template
+from flask import Flask, request, make_response, redirect, render_template, session
+from flask_bootstrap import Bootstrap
 
 app = Flask(__name__)
+bootstrap = Bootstrap(app)
+
+app.config['SECRET_KEY'] = 'SUPER SECRETO'
 
 todos = ['Comprar café', 'Solicitud de compra', 'todo 3', 'todo 4']
 
@@ -17,15 +21,20 @@ def index():
     user_ip = request.remote_addr
 
     response = make_response(redirect('hello'))
-    response.set_cookie('user_ip', user_ip)
-    response.set_cookie('user_name', 'Matías')
+    # response.set_cookie('user_ip', user_ip)
+    # response.set_cookie('user_name', 'Matías')
+    session['user_ip'] = user_ip
+    session['user_name'] = 'Matías'
 
     return response
 
 @app.route('/hello')
 def hello():
-    user_ip = request.cookies.get('user_ip')
-    user_name = request.cookies.get('user_name')
+    # user_ip = request.cookies.get('user_ip')
+    user_ip = session.get('user_ip')
+    # user_name = request.cookies.get('user_name')
+    user_name = session.get('user_name')
+
 
     context = {
         'user_ip': user_ip, 
