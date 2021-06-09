@@ -3,10 +3,9 @@ import unittest
 
 from app import create_app
 from app.forms import LoginForm
+from app.firestore_service import get_users, get_todos
 
 app = create_app()
-
-todos = ['Comprar café', 'Solicitud de compra', 'todo 3', 'todo 4']
 
 @app.cli.command()
 def test():
@@ -32,28 +31,22 @@ def index():
 
     return response
 
-@app.route('/hello', methods=['GET', 'POST'])
+@app.route('/hello', methods=['GET'])
 def hello():
-    # user_ip = request.cookies.get('user_ip')
     user_ip = session.get('user_ip')
-    # user_name = request.cookies.get('user_name')
     username = session.get('username')
-    login_form = LoginForm()
 
     context = {
         'user_ip': user_ip, 
         'username': username, 
-        'todos': todos,
-        'login_form': login_form
+        'todos': get_todos(username)
     }
     
-    if login_form.validate_on_submit():
-        username = login_form.username.data
-        session['username'] = username
+    users = get_users()
 
-        flash('Nombre de usuario registrado con éxito')
+    for user in users:
+        print(user.id)
+        print(user.to_dict()['password'])
 
-        return redirect(url_for('index'))
-    # return f'Hola {user_name}, tu IP es {user_ip}'
     # **context hace que expanda y exponga todas las variables y no sea necesario usar contenxt.user_ip por ejemplo, simplemente llamamos a user_ip
     return render_template('hello.html', **context)
